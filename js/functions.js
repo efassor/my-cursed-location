@@ -66,7 +66,8 @@ function doInit(){
 			  selectedHover: {
 			  }
 			},
-			selectedRegions : countryCode
+			selectedRegions : countryCode,
+			markers : [{latLng : latlong, name : 'Diane'}]
 	});
 }
 function showLogin(){

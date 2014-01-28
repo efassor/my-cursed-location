@@ -124,7 +124,7 @@ class Site{
 	}
 	private function loadCurrentLocation(){
 		$result = $this->db->exec("
-			SELECT lv.*, a.country, a.city, a.timeZoneOffset FROM locationvisits lv
+			SELECT lv.*, a.country, a.city, a.timeZoneOffset, a.latitude, a.longitude FROM locationvisits lv
 			JOIN airports a ON a.threeLetterCode = lv.threeLetterCode
 			WHERE isCurrent = 1
 			");
