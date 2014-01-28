@@ -4,7 +4,10 @@ class Site{
 		$this->f3 = Base::instance();
 		$this->db = new DB\SQL($this->f3->get('dbVars.path'), $this->f3->get('dbVars.username'), $this->f3->get('dbVars.password'));
 		$this->currentLocation = array();
-		$this->isLoggedIn = $this->f3->exists('SESSION.user');
+		$this->f3->set('isLoggedIn', $this->f3->exists('SESSION.user.username'));
+		if (!$this->f3->exists('SESSION.error')){
+			$this->f3->set('SESSION.error', false);
+		}
 	}
 	
 	
@@ -27,18 +30,37 @@ class Site{
 			$user=new DB\SQL\Mapper($this->db,'users');
 			$user->load(array('username=?', $_POST['username']));
 			if (!$user->dry() && $user->password == $pwHash){
-				$this->f3->push('SESSION.user', $user->cast());
+				$this->f3->set('SESSION.user', $user->cast());
 			}
 			else {
 				$error = 'Bad fucking login, goddammit';
 			}
 		}
-		if ($error){
-			$this->f3->push('SESSION.error', $error);
+		$this->f3->set('SESSION.error', $error);
+		$this->f3->reroute('/');
+	}
+	public function doLogOut(){
+		$this->f3->set('SESSION.error', false);
+		$this->f3->set('SESSION.user', false);
+		$this->f3->reroute('/');
+	}
+	public function editAccount(){
+		$error = false;
+		$user=new DB\SQL\Mapper($this->db,'users');
+		$user->load(array('username=?', $this->f3->get('SESSION.user.username')));
+		if ($user->dry()){
+			$error = "Bad username";
 		}
+		if (!$error && isset($_POST['newPassword'])){
+			$user->password = $this->hashPw($_POST['newPassword']);
+			$user->save();
+		}
+		$this->f3->set('SESSION.error', $error);
+		$this->f3->reroute('/');
+
 
 	}
-	
+			
 	
 	public function handleTwilioRequest(){
 		$error = false;

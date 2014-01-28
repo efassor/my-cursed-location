@@ -33,7 +33,7 @@ body{
 	font-variant:small-caps;
 	
 }
-#loginDiv{
+.loginText{
 	position:absolute;
 	top:95%;
 	left:95%;
@@ -46,4 +46,7 @@ body{
 	font-size:0.8em;
 	
 }
-
+.loginText a{
+	color:#999999;
+	text-decoration:none;
+}

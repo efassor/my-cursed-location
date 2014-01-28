@@ -3,10 +3,69 @@
 	<head>
 		<meta charset="utf8" />
 		<title>Where the fuck is Diane???</title>
+		<script type="text/javascript" src="js/jquery-1.9.1.js"></script>
+		<script type="text/javascript" src="jquery-ui/js/jquery-ui-1.10.3.custom.min.js"></script>
+		<script type="text/javascript" src="jquery-datatables/js/jquery.dataTables.min.js"></script>
+		<script type="text/javascript" src="js/functions.js"></script>
 		<link rel="stylesheet" href="templates/style.css" type="text/css" />
+		<link rel="stylesheet" href="jquery-ui/css/custom-theme/jquery-ui-1.10.3.custom.css" type="text/css" />
+        
+        
 	</head>
 	<body>
 		<include href="{{ @content }}" />
-        <div id="loginDiv">I'm Diane, log me the fuck in</div>
+        <check if="{{ @isLoggedIn }}"> 
+        	<true>
+                <div class="loginText"><a href="logout/">Log me the fuck out</a><a onClick="showAccount()" href="#">Account</a></div>
+                <div id="accountDialog"> 
+                	<div id="errorMessageDiv"></div>
+                	<form action="editAccount" method="post" id="accountForm"> 
+                        <label for="password">Password</label>
+                        <input type="text" name = "password" id="password">
+                        <label for="newPassword">New password</label>
+                        <input type="text" id="newPassword" name="newPassword">
+                     </form>
+                </div> 
+            </true>
+            <false> 
+                <div class="loginText"><a onClick="showLogin()" href="#">I'm Diane, log me the fuck in</a></div>
+                <div id="logOnDialog"> 
+                	<div id="errorMessageDiv"></div>
+                	<form action="login/" method="post" id="loginForm"> 
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username">
+                        <label for="password">Password</label>
+                        <input type="text" id="password" name="password">
+                     </form>
+                </div> 
+                
+            </false> 
+		</check> 
+        <script type="text/javascript">
+        <check if="{{ @isLoggedIn }}"> 
+        	<true>
+				var loggedIn = true;
+			</true>
+			<false>
+				var loggedIn = false;
+
+			</false>
+			
+		</check>
+        <check if="{{ @SESSION.error }}"> 
+        	<true>
+				var formErrorMessage = "{{ @SESSION.error }}";
+			</true>
+			<false>
+				var formErrorMessage = false;
+
+			</false>
+			
+		</check>
+			$(document).ready(function(e) {
+				doInit();
+
+            });
+		</script>               
 	</body>
 </html>
