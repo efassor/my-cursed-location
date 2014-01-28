@@ -30,7 +30,7 @@ function doInit(){
 		$( "#accountDialog" ).dialog({ //Initialize popup dialog for logon
 			autoOpen: openDialog,
 			height: 300,
-			width: 350,
+			width: 400,
 			modal: true,
 			buttons: {
 				"Save": function() {

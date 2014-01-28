@@ -50,6 +50,9 @@ class Site{
 		if ($user->dry()){
 			$error = "Bad username";
 		}
+		if (!(isset($_POST['password']) && $this->hashPw($_POST['password']) == $user->password)){
+			$error = "Bad password, dammit!";
+		}
 		if (!$error && isset($_POST['newPassword'])){
 			$user->password = $this->hashPw($_POST['newPassword']);
 			$user->save();

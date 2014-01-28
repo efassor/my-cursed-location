@@ -19,14 +19,14 @@
 		<include href="{{ @content }}" />
         <check if="{{ @isLoggedIn }}"> 
         	<true>
-                <div class="loginText"><a href="logout/">Log me the fuck out</a><a onClick="showAccount()" href="#">Account</a></div>
+                <div class="loginText"><a href="logout/">Log me the fuck out</a>&nbsp;&nbsp;<a onClick="showAccount()" href="#">Account</a></div>
                 <div id="accountDialog"> 
                 	<div id="errorMessageDiv"></div>
                 	<form action="editAccount" method="post" id="accountForm"> 
                         <label for="password">Password</label>
-                        <input type="text" name = "password" id="password">
+                        <input type="password" name = "password" id="password"><br>
                         <label for="newPassword">New password</label>
-                        <input type="text" id="newPassword" name="newPassword">
+                        <input type="password" id="newPassword" name="newPassword">
                      </form>
                 </div> 
             </true>
@@ -36,9 +36,9 @@
                 	<div id="errorMessageDiv"></div>
                 	<form action="login/" method="post" id="loginForm"> 
                         <label for="username">Username</label>
-                        <input type="text" id="username" name="username">
+                        <input type="text" id="username" name="username"><br>
                         <label for="password">Password</label>
-                        <input type="text" id="password" name="password">
+                        <input type="password" id="password" name="password">
                      </form>
                 </div> 
                 
