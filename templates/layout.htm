@@ -6,8 +6,11 @@
 		<script type="text/javascript" src="js/jquery-1.9.1.js"></script>
 		<script type="text/javascript" src="jquery-ui/js/jquery-ui-1.10.3.custom.min.js"></script>
 		<script type="text/javascript" src="jquery-datatables/js/jquery.dataTables.min.js"></script>
+		<script type="text/javascript" src="jVectorMap/jquery-jvectormap-1.2.2.min.js"></script>
+		<script type="text/javascript" src="jVectorMap/jquery-jvectormap-world-mill-en.js"></script>
 		<script type="text/javascript" src="js/functions.js"></script>
 		<link rel="stylesheet" href="templates/style.css" type="text/css" />
+		<link rel="stylesheet" href="jVectorMap/jquery-jvectormap-1.2.2.css" type="text/css" />
 		<link rel="stylesheet" href="jquery-ui/css/custom-theme/jquery-ui-1.10.3.custom.css" type="text/css" />
         
         
@@ -62,6 +65,7 @@
 			</false>
 			
 		</check>
+		var country = "{{ @location.country }}";
 			$(document).ready(function(e) {
 				doInit();
 

@@ -14,7 +14,6 @@ class Site{
 	public function showIndex(){
 		$this->loadCurrentLocation(); 
 		$this->f3->set('content', 'location.htm');
-		$this->f3->set('location', $this->currentLocation['city']);
 		echo Template::instance()->render('layout.htm');
 	}
 	
@@ -143,7 +142,7 @@ class Site{
 		}
 		$currentLocation['phoneNumber'] = $locationDetails['phoneNumber'];
 		$currentLocation['locationExtraStuffJson'] = $locationDetails['extraStuffJson'];
-		$this->currentLocation = $currentLocation;
+		$this->f3->set('location', $currentLocation);
 	}
 	private function hashPw($pw){
 		return hash("sha256", $this->f3->get("appVars.passwordSalt") . $pw);

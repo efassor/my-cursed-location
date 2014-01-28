@@ -15,6 +15,7 @@ body{
 	margin-left:auto;
 	margin-right:auto;
 	text-align:left;
+	z-index:2;
 }
 #locationInnerDiv{
 	background: rgb(252,236,252); /* Old browsers */
@@ -31,6 +32,12 @@ body{
 	text-align:center;
 	padding:15px;
 	font-variant:small-caps;
+	
+}
+#worldMap{
+	position:absolute;
+	width:100%;
+	height:100%;
 	
 }
 .loginText{
