@@ -8,6 +8,7 @@ class Site{
 				'activeTab' => 'currentLocationTab',
 				'activeForm' => false
 				);
+		$this->f3->set('isLoggedIn', $this->appVars['isLoggedIn']);
 		if (!$this->f3->exists('SESSION.error')){
 			$this->f3->set('SESSION.error', false);
 		}
@@ -98,6 +99,7 @@ class Site{
 		$this->f3->set('SESSION.error', false);
 		$this->f3->set('SESSION.user', false);
 		$this->appVars['isLoggedIn'] = false;
+		$this->f3->set('isLoggedIn', false);
 		$this->f3->reroute('/');
 	}
 	private function doLogIn(){
@@ -113,6 +115,7 @@ class Site{
 			if ($user){
 				$this->f3->set('SESSION.user', $user);
 				$this->appVars['isLoggedIn'] = true;
+				$this->f3->set('isLoggedIn', true);
 			}
 			else {
 				$error = 'Bad fucking login, goddammit';

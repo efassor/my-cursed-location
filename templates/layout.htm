@@ -17,7 +17,7 @@
 	</head>
 	<body>
 		<include href="{{ @content }}" />
-        <check if="{{ @SESSION.user.username }}"> 
+        <check if="{{ @isLoggedIn}}"> 
         	<true>
                 <div class="loginText"><a href="logout/">Log me the fuck out</a>&nbsp;&nbsp;<a onClick="showAccount()" href="#">Account</a></div>
                 <div id="editAccountDialog"> 

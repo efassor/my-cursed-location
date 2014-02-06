@@ -32,7 +32,7 @@ function doInit(){
 		});
 		$( "#editLocationDialog" ).dialog({
 			autoOpen: false,
-			height: 400,
+			height: 500,
 			width: 400,
 			modal: true,
 			buttons: {
