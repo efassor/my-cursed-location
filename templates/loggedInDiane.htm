@@ -1,0 +1,117 @@
+<div id="worldMap">
+</div>
+
+<div id="mainTabGroup">
+	<ul>
+        <li><a href="#currentLocationTab">Current Location</a></li>
+        <li><a href="#locationsTab">Locations</a></li>
+        <li><a href="#phoneNumbersTab">Phone Numbers</a></li>
+	</ul>
+	<div id="currentLocationTab">
+        <div id="locationOuterDiv">
+            <p style="font-style:italic">Diane is in fucking:</p>
+            <div id="locationInnerDiv">
+                {{ @currentLocation.city }}
+            </div>
+        </div>
+    </div>
+    <div id="locationsTab">
+        <table id="locations">
+            <thead><tr>
+                <th>Airport Code</th>
+                <th>Sub Code</th>
+                <th>Name</th>
+                <th>Country</th>
+                <th>Phone Number</th>
+                <th></th>
+            </tr></thead>
+            <repeat group="{{ @locations }}" value="{{ @locationDetails }}">
+                <tr>
+                    <td>{{ (@locationDetails.threeLetterCode) }}</td>
+                    <td>{{ (@locationDetails.subCode) }}</td>
+                    <td>{{ (@locationDetails.city) }}</td>
+                    <td>{{ (@locationDetails.country) }}</td>
+                    <td>{{ (@locationDetails.phoneNumber) }}</td>
+                    <td>
+                        <button type="button" onClick="editLocation('{{ (@locationDetails.threeLetterCode) }}', '{{ (@locationDetails.subCode) }}')">Edit</button>
+                        <button type="button" onClick="setLocation('{{ (@locationDetails.threeLetterCode) }}', '{{ (@locationDetails.subCode) }}')">I'm here</button>
+                    </td>
+                </tr>
+            </repeat>
+            <tr>
+                <td colspan="6">
+                    <button type="button" onClick="addLocation()">New Location</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="phoneNumbersTab">
+        <table id="phoneNumbers">
+            <thead><tr>
+                <th>Name</th>
+                <th>Number</th>
+                <th></th>
+            </tr></thead>
+            <repeat group="{{ @phoneNumbers }}" value="{{ @phoneNumber }}">
+                <tr>
+                    <td>{{ (@phoneNumber.name) }}</td>
+                    <td>{{ (@phoneNumber.phoneNumber) }}</td>
+                    <td>
+                        <button type="button" onClick="editPhoneNumber({{ (@phoneNumber.id) }})">Edit</button>
+                    </td>
+                </tr>
+            </repeat>
+            <tr>
+                <td colspan="3">
+                    <button type="button" onClick="addPhoneNumber()">New Number</button>
+                </td>
+            </tr>
+        </table>
+	</div>
+</div>
+
+<div id="setLocationDialog"> 
+    <div id="setLocationMessage"></div>
+    <form method="post" id="setLocationForm"> 
+        <input type="hidden" name="formId" value="setLocation">
+        <input type="hidden" name="threeLetterCode" id="setLocationThreeLetterCode" value="">
+        <input type="hidden" name="subCode" id="setLocationSubCode" value="">
+        <label for="subLocation">Description</label>
+        <input type="text" name = "subLocation"><br>
+        <label for="newPassword">Time for hanging out</label>
+        <input type="checkbox" name="timeForHangouts" checked="checked"><br>
+     </form>
+</div> 
+<div id="editLocationDialog"> 
+    <div id="editLocationMessage"></div>
+    <form method="post" id="editLocationForm"> 
+        <input type="hidden" name="formId" value="editLocation">
+        <input type="hidden" name="currentThreeLetterCode" id="editLocationCurrentThreeLetterCode" value="">
+        <input type="hidden" name="currentSubCode" id="editLocationCurrentSubCode" value="">
+        <label for="threeLetterCode">Airport Code</label>
+        <input type="text" name = "threeLetterCode" id="editLocationThreeLetterCode"><br>
+        <label for="subCode">Subcode</label>
+        <input type="text" name="subCode" id="editLocationSubCode"><br>
+        <label for="city">City/place name(if different than airport city)</label>
+        <input type="text" name="city" id="editLocationCity"><br>
+        <label for="country">Country(if different than airport country)</label>
+        <input type="text" name="country" id="editLocationCountry"><br>
+        <label for="phoneNumberId">Phone Number</label>
+        <select name="phoneNumberId" id="editLocationPhoneNumberId">
+            <repeat group="{{ @phoneNumbers }}" value="{{ @phoneNumber }}">
+                <option value={{ @phoneNumber.id }}>{{ @phoneNumber.name }}</option>
+            </repeat>
+        </select>
+     </form>
+</div> 
+<div id="editPhoneNumberDialog"> 
+    <div id="editPhoneNumberMessage"></div>
+    <form method="post" id="editPhoneNumberForm"> 
+        <input type="hidden" name="formId" value="editPhoneNumber">
+        <input type="hidden" name="phoneNumberId" id = "editPhoneNumberPhoneNumberId" value="editPhoneNumber">
+        <label for="name">Name</label>
+        <input type="text" name="name" id="editPhoneNumberName"><br>
+        <label for="phoneNumber">Phone Number</label>
+        <input type="text" name="phoneNumber" id="editPhoneNumberPhoneNumber"><br>
+     </form>
+</div> 

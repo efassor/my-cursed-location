@@ -3,8 +3,11 @@ class Site{
 	public function __construct(){
 		$this->f3 = Base::instance();
 		$this->db = new DB\SQL($this->f3->get('dbVars.path'), $this->f3->get('dbVars.username'), $this->f3->get('dbVars.password'));
-		$this->currentLocation = array();
-		$this->f3->set('isLoggedIn', $this->f3->exists('SESSION.user.username'));
+		$this->appVars = array(
+				'isLoggedIn' => $this->f3->exists('SESSION.user.username'),
+				'activeTab' => 'currentLocationTab',
+				'activeForm' => false
+				);
 		if (!$this->f3->exists('SESSION.error')){
 			$this->f3->set('SESSION.error', false);
 		}
@@ -12,63 +15,63 @@ class Site{
 	
 	
 	public function showIndex(){
-		$this->loadCurrentLocation(); 
-		$this->f3->set('content', 'location.htm');
+		$Locations = new Locations();
+		$jsVars = $this->appVars;
+		if ($this->appVars['isLoggedIn'] && $this->f3->get('SESSION.user.userLevel') == 1){
+			$this->f3->set('content', 'loggedInDiane.htm');
+			$this->f3->set('locations', $Locations->getAllLocations());
+			$this->f3->set('phoneNumbers', $Locations->getAllPhoneNumbers());
+			$jsVars['locations'] = $this->f3->get('locations');
+			$jsVars['phoneNumbers'] = $this->f3->get('phoneNumbers');
+		}
+		else {
+			$this->f3->set('content', 'notLoggedIn.htm');
+		}
+		$this->f3->set('currentLocation', $Locations->getCurrentLocation());
+		$jsVars['currentLocation'] = $this->f3->get('currentLocation');
+		$jsVars['activeTab'] = $this->appVars['activeTab'];
+		$jsVars['error'] = $this->f3->get('SESSION.error');
+		$this->f3->set('initDataStr', json_encode($jsVars));
 		echo Template::instance()->render('layout.htm');
 	}
 	
-	public function doLogIn(){
-		$error = false;
-		if (isset($_POST['username']) && isset($_POST['password'])){
-			$pwHash = $this->hashPw($_POST['password']);
-		}
-		else {
-			$error = 'You fucking need both a username and password.';
-		}
-		if (!$error){
-			$user=new DB\SQL\Mapper($this->db,'users');
-			$user->load(array('username=?', $_POST['username']));
-			if (!$user->dry() && $user->password == $pwHash){
-				$this->f3->set('SESSION.user', $user->cast());
-			}
-			else {
-				$error = 'Bad fucking login, goddammit';
-			}
-		}
-		$this->f3->set('SESSION.error', $error);
-		$this->f3->reroute('/');
-	}
-	public function doLogOut(){
-		$this->f3->set('SESSION.error', false);
-		$this->f3->set('SESSION.user', false);
-		$this->f3->reroute('/');
-	}
-	public function editAccount(){
-		$error = false;
-		$user=new DB\SQL\Mapper($this->db,'users');
-		$user->load(array('username=?', $this->f3->get('SESSION.user.username')));
-		if ($user->dry()){
-			$error = "Bad username";
-		}
-		if (!(isset($_POST['password']) && $this->hashPw($_POST['password']) == $user->password)){
-			$error = "Bad password, dammit!";
-		}
-		if (!$error && isset($_POST['newPassword'])){
-			$user->password = $this->hashPw($_POST['newPassword']);
-			$user->save();
-		}
-		$this->f3->set('SESSION.error', $error);
-		$this->f3->reroute('/');
+	public function routeForm(){
+		if (isset($_POST['formId'])){
+			switch($_POST['formId']){
+				case 'login':
+					$this->doLogIn();
+					break;
+				case 'editAccount':
+					$this->editAccount();
+					break;
+				case 'editLocation':
+					$this->editLocation();
+					$this->appVars['activeTab'] = 'locationsTab';
+					break;
+				case 'editPhoneNumber':
+					$this->editPhoneNumber();
+					$this->appVars['activeTab'] = 'phoneNumbersTab';
+					break;
+				case 'setLocation':
 
+					$this->setLocationFromForm();
 
-	}
+					$this->appVars['activeTab'] = 'locationsTab';
+					break;
+			}
+			if ($this->f3->get('SESSION.error')){
+				$this->appVars['activeForm'] = $_POST['formId'];
+			}
 			
-	
+			
+		}
+
+		$this->showIndex();
+		
+	}
 	public function handleTwilioRequest(){
 		$error = false;
-		$airport = new DB\SQL\Mapper($this->db,'airports');
-		$locationDetail = new DB\SQL\Mapper($this->db,'locationdetails');
-		$locationVisit = new DB\SQL\Mapper($this->db,'locationvisits');
+		$Locations = new Locations();
 
 		if (!isset($_POST['Body']) || strlen($_POST['Body']) < 3){
 			$error = "Missing or too short message";
@@ -77,43 +80,12 @@ class Site{
 			$threeLetterCode = substr($_POST['Body'], 0, 3);
 			if (strlen($_POST['Body']) > 4){
 				$subLocation = substr($_POST['Body'], 4);
-				$subLocationIsSubCode = false;
 			}
 			else {
 				$subLocation = false;
 			}
-			$airport->load(array('threeLetterCode=?', $threeLetterCode));
-			if ($airport->dry()){
-				$error = "Can't find airport \"$threeLetterCode\"" ;
-			}
-		}
-		if (!$error){
-			if ($subLocation){
-				$locationDetail->load(array('threeLetterCode=? AND subCode=?', $threeLetterCode, $subLocation));
-			}
-			if (!$subLocation || $locationDetail->dry()){
-				$locationDetail->load(array('threeLetterCode=?', $threeLetterCode));
-			}
-			else {
-				$subLocationIsSubCode = true;
-			}
-			if ($locationDetail->dry()){
-				$locationDetail->threeLetterCode = $threeLetterCode;
-				$locationDetail->phoneNumberId = $this->f3->get('appVars.defaultPhoneNumberId');
-				$locationDetail->save();
-			}
-			$this->db->exec('UPDATE locationvisits SET isCurrent = 0');
-			$locationVisit->threeLetterCode = $threeLetterCode;
-			if ($subLocation){
-				if ($subLocationIsSubCode){
-					$locationVisit->subCode = $subLocation;
-				}
-				else {
-					$locationVisit->subLocationName = $subLocation;
-				}
-			}
-			$locationVisit->isCurrent = true;
-			$locationVisit->save();
+			$result = $Locations->setCurrentLocation($threeLetterCode, $subLocation);
+			$error = $result['error'];
 		}
 		$responseMsg = $error?$error:'Location fucking updated!';
 		header("content-type: text/xml");
@@ -122,34 +94,77 @@ class Site{
 					<Message>' . $responseMsg . '</Message>
 				</Response>';
 	}
-	private function loadCurrentLocation(){
-		$result = $this->db->exec("
-			SELECT lv.*, a.country, a.city, a.timeZoneOffset, a.latitude, a.longitude FROM locationvisits lv
-			JOIN airports a ON a.threeLetterCode = lv.threeLetterCode
-			WHERE isCurrent = 1
-			");
-		$currentLocation = $result[0];
-		$query = "
-			SELECT city, country, phoneNumber, extraStuffJson FROM locationdetails ld
-			LEFT JOIN phonenumbers pn ON ld.phoneNumberId = pn.id
-			WHERE threeLetterCode = '{$currentLocation['threeLetterCode']}'";
-		if ($currentLocation['subCode']){
-			$query .= " AND subCode = '{$currentLocation['subCode']}'";
+	public function doLogOut(){
+		$this->f3->set('SESSION.error', false);
+		$this->f3->set('SESSION.user', false);
+		$this->appVars['isLoggedIn'] = false;
+		$this->f3->reroute('/');
+	}
+	private function doLogIn(){
+		$error = false;
+		$Users = new Users();
+		if (isset($_POST['username']) && isset($_POST['password'])){
+			$user = $Users->getUser($_POST['username'], $_POST['password']);
 		}
-		$result = $this->db->exec($query);
-		$locationDetails = $result[0];
-		foreach(array('city', 'country') as $k){
-			if ($locationDetails[$k]){
-				$currentLocation[$k] = $locationDetails[$k];
+		else {
+			$error = 'You fucking need both a username and password.';
+		}
+		if (!$error){
+			if ($user){
+				$this->f3->set('SESSION.user', $user);
+				$this->appVars['isLoggedIn'] = true;
+			}
+			else {
+				$error = 'Bad fucking login, goddammit';
 			}
 		}
-		$currentLocation['phoneNumber'] = $locationDetails['phoneNumber'];
-		$currentLocation['locationExtraStuffJson'] = $locationDetails['extraStuffJson'];
-		$this->f3->set('location', $currentLocation);
+		$this->f3->set('SESSION.error', $error);
 	}
-	private function hashPw($pw){
-		return hash("sha256", $this->f3->get("appVars.passwordSalt") . $pw);
+	private function editAccount(){
+		$Users = new Users();
+		$error = false;
+		if ($this->appVars['isLoggedIn'] && isset($_POST['password']) && isset($_POST['newPassword'])){
+			$result = $Users->updateAccount($this->f3->get('SESSION.user.username'), $_POST['password'], $_POST['newPassword']);
+			$error = $result['error'];
+		}
+		$this->f3->set('SESSION.error', $error);
 	}
+	private function setLocationFromForm(){
+		$error = false;
+		$Locations = new Locations();
+		if (isset($_POST['threeLetterCode'])){
+			$subCode = isset($_POST['subCode'])?$_POST['subCode'] : '';
+			$result = $Locations->setCurrentLocation($_POST['threeLetterCode'], $subCode, $_POST['subLocation'], isset($_POST['timeForHangouts']));
+			$error = $result['error'];
+		}
+		else {
+			$error = 'No Location Specified';
+		}
+		$this->f3->set('SESSION.error', $error);
+	}
+	private function editLocation (){
+		$Locations = new Locations();
+		if ($_POST['currentThreeLetterCode']){
+			$result = $Locations->editLocation($_POST);
+		}
+		else {
+			$result = $Locations->addLocation($_POST);
+		}
+		$error = $result['error'];
+		$this->f3->set('SESSION.error', $error);
+	}
+	private function editPhoneNumber(){
+		$Locations = new Locations();
+		if ($_POST['phoneNumberId']){
+			$result = $Locations->editPhoneNumber($_POST);
+		}
+		else {
+			$result = $Locations->addPhoneNumber($_POST);
+		}
+		$error = $result['error'];
+		$this->f3->set('SESSION.error', $error);
+	}
+			
 			
 }
 

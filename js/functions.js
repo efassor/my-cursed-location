@@ -4,17 +4,63 @@ var countryNamesToMapCodes = { 'Bangladesh' : 'BD', 'Belgium' : 'BE', 'Burkina F
 
 
 function doInit(){
-	if (formErrorMessage){
-		$("#errorMessageDiv").html(formErrorMessage);
-		openDialog = true;
+
+	if (initData['isLoggedIn']){			
+		$( "#editAccountDialog" ).dialog({
+			autoOpen: false,
+			height: 300,
+			width: 400,
+			modal: true,
+			buttons: {
+				"Save": function() {
+					$(this).dialog("close");
+					$("#editAccountForm").submit();
+				}
+			}
+		});
+		$( "#setLocationDialog" ).dialog({
+			autoOpen: false,
+			height: 300,
+			width: 400,
+			modal: true,
+			buttons: {
+				"Save": function() {
+					$(this).dialog("close");
+					$("#setLocationForm").submit();
+				}
+			}
+		});
+		$( "#editLocationDialog" ).dialog({
+			autoOpen: false,
+			height: 400,
+			width: 400,
+			modal: true,
+			buttons: {
+				"Save": function() {
+					$(this).dialog("close");
+					$("#editLocationForm").submit();
+				}
+			}
+		});
+		$( "#editPhoneNumberDialog" ).dialog({
+			autoOpen: false,
+			height: 300,
+			width: 400,
+			modal: true,
+			buttons: {
+				"Save": function() {
+					$(this).dialog("close");
+					$("#editPhoneNumberForm").submit();
+				}
+			}
+		});
+		indexLocations();
+		$("#mainTabGroup").tabs( {active : $("#mainTabGroup>div").index($("#" + initData['activeTab'])) } );
+
 	}
 	else {
-		openDialog = false;
-	}
-	if (!loggedIn){
-			
-		$( "#logOnDialog" ).dialog({ //Initialize popup dialog for logon
-			autoOpen: openDialog,
+		$( "#loginDialog" ).dialog({ //Initialize popup dialog for logon
+			autoOpen: false,
 			height: 300,
 			width: 350,
 			modal: true,
@@ -26,26 +72,17 @@ function doInit(){
 			}
 		});
 	}
-	else {
-		$( "#accountDialog" ).dialog({ //Initialize popup dialog for logon
-			autoOpen: openDialog,
-			height: 300,
-			width: 400,
-			modal: true,
-			buttons: {
-				"Save": function() {
-					$(this).dialog("close");
-					$("#accountForm").submit();
-				}
-			}
-		});
-	}
-	if (country in countryNamesToMapCodes){
-		countryCode = countryNamesToMapCodes[country];
+	if (initData['currentLocation']['country'] in countryNamesToMapCodes){
+		countryCode = countryNamesToMapCodes[initData['currentLocation']['country']];
 	}
 	else {
 		countryCode = false;
 	}
+	if (initData['activeForm']){
+		$("#" + initData['activeForm'] + "Message").html(initData['error']);
+		$("#" + initData['activeForm'] + "Dialog").dialog("open");
+	}
+
     $('#worldMap').vectorMap({
           map: 'world_mill_en',
 		  backgroundColor: '#000000',
@@ -67,13 +104,73 @@ function doInit(){
 			  }
 			},
 			selectedRegions : countryCode,
-			markers : [{latLng : latlong, name : 'Diane'}]
+			markers : [{latLng  : [initData['currentLocation']['latitude'], initData['currentLocation']['longitude']], name : 'Diane'}]
 	});
 }
 function showLogin(){
-	$( "#logOnDialog" ).dialog('open');
+	$( "#loginDialog" ).dialog('open');
 }
 function showAccount(){
-	$( "#accountDialog" ).dialog('open');
+	$("#editAccountDialog").dialog('open');
 }
+function setLocation(threeLetterCode, subCode){
+	$("#setLocationThreeLetterCode").val(threeLetterCode);
+	$("#setLocationSubCode").val(subCode);
+	$("#setLocationDialog").dialog('open');
+}
+function editLocation(threeLetterCode, subCode){
+	$("#editLocationCurrentThreeLetterCode").val(threeLetterCode);
+	$("#editLocationCurrentSubCode").val(subCode);
+	$("#editLocationDialog").dialog('open');
+	$("#editLocationThreeLetterCode").css("display", "none");
+	$("label[for='threeLetterCode']").css("display", "none");
+	$("#editLocationSubCode").css("display", "none");
+	$("label[for='subCode']").css("display", "none");
+
+}
+function addLocation(){
+	$("#editLocationCurrentThreeLetterCode").val('');
+	$("#editLocationCurrentSubCode").val('');
+	$("#editLocationDialog").dialog('open');
+	$("#editLocationThreeLetterCode").css("display", "block");
+	$("label[for='threeLetterCode']").css("display", "block");
+	$("#editLocationSubCode").css("display", "block");
+	$("label[for='subCode']").css("display", "block");
+
+}
+function editPhoneNumber(phoneNumberId){
+	$("#editPhoneNumberPhoneNumberId").val(phoneNumberId);
+	$("#editPhoneNumberDialog").dialog('open');
+	$("#editPhoneNumberName").val(initData['phoneNumbers'][phoneNumberId]['name']);
+	$("#editPhoneNumberPhoneNumber").val(initData['phoneNumbers'][phoneNumberId]['phoneNumber']);
+}
+function addPhoneNumber(){
+	$("#editPhoneNumberPhoneNumberId").val('');
+	$("#editPhoneNumberDialog").dialog('open');
+}
+function indexLocations(){
+	if ("locations" in initData){
+		var restructuredData = {};
+		for (i=0; i< initData['locations'].length; i++){
+			threeLetterCode = initData['locations'][i]['threeLetterCode'];
+			subCode = initData['locations'][i]['threeLetterCode'];
+			if (!(threeLetterCode in restructuredData)){
+				restructuredData[threeLetterCode] = {};
+			}
+			restructuredData[threeLetterCode][subCode] = initData['locations'][i];
+		}
+		initData['locations'] = restructuredData;
+		var restructuredData = {};
+		for (i=0; i< initData['phoneNumbers'].length; i++){
+			id = initData['phoneNumbers'][i]['id'];
+			restructuredData[id] = initData['phoneNumbers'][i];
+		}
+		initData['phoneNumbers'] = restructuredData;
+	}
+			
+				
+			
+				
 	
+	
+}

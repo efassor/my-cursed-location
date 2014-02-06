@@ -2,27 +2,28 @@
 <html lang="en">
 	<head>
 		<meta charset="utf8" />
+        <meta name="description" content="Your one stop source for finding out where in the fucking world Diane is" />
 		<title>Where the fuck is Diane???</title>
 		<script type="text/javascript" src="js/jquery-1.9.1.js"></script>
-		<script type="text/javascript" src="jquery-ui/js/jquery-ui-1.10.3.custom.min.js"></script>
-		<script type="text/javascript" src="jquery-datatables/js/jquery.dataTables.min.js"></script>
+		<script type="text/javascript" src="jquery-ui/js/jquery-ui-1.10.4.custom.min.js"></script>
 		<script type="text/javascript" src="jVectorMap/jquery-jvectormap-1.2.2.min.js"></script>
 		<script type="text/javascript" src="jVectorMap/jquery-jvectormap-world-mill-en.js"></script>
 		<script type="text/javascript" src="js/functions.js"></script>
 		<link rel="stylesheet" href="templates/style.css" type="text/css" />
 		<link rel="stylesheet" href="jVectorMap/jquery-jvectormap-1.2.2.css" type="text/css" />
-		<link rel="stylesheet" href="jquery-ui/css/custom-theme/jquery-ui-1.10.3.custom.css" type="text/css" />
+		<link rel="stylesheet" href="jquery-ui/css/custom-theme/jquery-ui-1.10.4.custom.css" type="text/css" />
         
         
 	</head>
 	<body>
 		<include href="{{ @content }}" />
-        <check if="{{ @isLoggedIn }}"> 
+        <check if="{{ @SESSION.user.username }}"> 
         	<true>
                 <div class="loginText"><a href="logout/">Log me the fuck out</a>&nbsp;&nbsp;<a onClick="showAccount()" href="#">Account</a></div>
-                <div id="accountDialog"> 
-                	<div id="errorMessageDiv"></div>
-                	<form action="editAccount" method="post" id="accountForm"> 
+                <div id="editAccountDialog"> 
+                	<div id="editAccountMessage"></div>
+                	<form method="post" id="editAccountForm"> 
+                    	<input type="hidden" name="formId" value="editAccount">
                         <label for="password">Password</label>
                         <input type="password" name = "password" id="password"><br>
                         <label for="newPassword">New password</label>
@@ -32,9 +33,10 @@
             </true>
             <false> 
                 <div class="loginText"><a onClick="showLogin()" href="#">I'm Diane, log me the fuck in</a></div>
-                <div id="logOnDialog"> 
-                	<div id="errorMessageDiv"></div>
-                	<form action="login/" method="post" id="loginForm"> 
+                <div id="loginDialog"> 
+                	<div id="loginErrorMessage"></div>
+                	<form  method="post" id="loginForm"> 
+                    	<input type="hidden" name="formId" value="login">
                         <label for="username">Username</label>
                         <input type="text" id="username" name="username"><br>
                         <label for="password">Password</label>
@@ -45,28 +47,8 @@
             </false> 
 		</check> 
         <script type="text/javascript">
-        <check if="{{ @isLoggedIn }}"> 
-        	<true>
-				var loggedIn = true;
-			</true>
-			<false>
-				var loggedIn = false;
 
-			</false>
-			
-		</check>
-        <check if="{{ @SESSION.error }}"> 
-        	<true>
-				var formErrorMessage = "{{ @SESSION.error }}";
-			</true>
-			<false>
-				var formErrorMessage = false;
-
-			</false>
-			
-		</check>
-		var country = "{{ @location.country }}";
-		var latlong = [{{ @location.latitude }}, {{ @location.longitude }}] ;
+		var initData = {{ @initDataStr | raw}};
 			$(document).ready(function(e) {
 				doInit();
 
