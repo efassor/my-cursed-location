@@ -9,4 +9,5 @@ $f3->config('routes.ini');
 
 
 $f3->run();
+
 ?>
