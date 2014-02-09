@@ -18,6 +18,8 @@ class Site{
 	public function showIndex(){
 		$Locations = new Locations();
 		$jsVars = $this->appVars;
+		$this->f3->set('currentLocation', $Locations->getCurrentLocation());
+		$jsVars['currentLocation'] = $this->f3->get('currentLocation');
 		if ($this->appVars['isLoggedIn'] && $this->f3->get('SESSION.user.userLevel') == 1){
 			$this->f3->set('content', 'loggedInDiane.htm');
 			$this->f3->set('locations', $Locations->getAllLocations());
@@ -27,9 +29,8 @@ class Site{
 		}
 		else {
 			$this->f3->set('content', 'notLoggedIn.htm');
+			unset($jsVars['currentLocation']['phoneNumber']);
 		}
-		$this->f3->set('currentLocation', $Locations->getCurrentLocation());
-		$jsVars['currentLocation'] = $this->f3->get('currentLocation');
 		$jsVars['activeTab'] = $this->appVars['activeTab'];
 		$jsVars['error'] = $this->f3->get('SESSION.error');
 		$this->f3->set('initDataStr', json_encode($jsVars));
